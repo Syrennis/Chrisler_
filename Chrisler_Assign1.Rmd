@@ -1,0 +1,100 @@
+---
+title: "Chrisler_Assign1"
+author: "Brett Chrisler"
+date: "February 12, 2018"
+bibliography: Bibliography.xml
+output: html_document
+---
+
+```{r, echo = FALSE}
+#DROPBOX LINK FOR DATASET : https://www.dropbox.com/s/5a6gedg7bxltq9r/netcdf.zip?dl=0
+library(checkpoint)
+checkpoint('2018-02-12')
+```
+
+# __Madden - Julian Oscillation and Outgoing Longwave Radiation__
+
+### Motivation
+The Madden - Julian Oscillation (MJO) is a large-scale circulation that is coupled with convection. This phenomena propagates eastward at 5 m/s and has an intraseasonal lifespan of 30 - 90 days. Although the location of initiation and termination varies, the MJO often begins in the Indian Ocean and ends in the Western Pacific. There are two phases of the MJO: the active and inactive phase. During the active phase, higher precipitation amounts exist with strong convection, while the inactive phase contains weak to no convection and lower precipitation amounts. These two phases leave a widespread effect on the spatial distribution of outgoing longwave radiation (OLR) [@Zhang2005].
+
+The Madden - Julian Oscillation has significant impacts on global climate, so improving models is crucial to predict how future events will unfold. Currently, global climate models do fairly well when the MJO is in the active phase, but fail when it comes to the initiation and termination of convection. Outgoing longwave radiation anomalies have been studied as a precursor for both initiation and termination. Researching this parameter, along with others, is vital for improved models and climate prediction [@Jones2011].
+
+### Data and Analysis
+Daily outgoing longwave radiation values from 1979 - 2000 from the National Weather Service Climate Prediction Center were available for analysis on the global scale. Each daily dataset contains values for every 2.5 degrees latitude and 5 degrees longitude. Values from 1979 - 2000 were used for the analysis. OLR anomalies will be negative (lower OLR values) in areas of cloud cover, which will occur during increased convection and active phases, while positive values will occur during quiescent periods as clear skies allow radiation to escape freely. OLR anomalies can be observed propagating eastward through the eight phases of the MJO, as seen in Figure 1, where phases correspond to the location of the event. The peak phase for termination of an MJO event is in phase-8 (Western Hemisphere) [@Stachnik2014].
+
+The mean, standard deviation, 25th percentile, median, 75th percentile, minimum, and maximum were calculated to view statistical information of the dataset. These statistics were plotted as a boxplot for a visual representation. These statistical measurements can be used in future analysis to compare to distributions with confidence intervals to see how the mean compares among different methods. The equations for mean and standard deviation are listed below.  
+
+<center>Mean</center>
+$$\mu =\frac{\sum_{i=1}^nX_i}{n}\text{ (1)}$$
+<center>Standard Deviation<center/>
+$$\sigma =\sqrt{\frac{1}{n}{\sum_{i=1}^n (X_i - \mu)^2}} \text{ (2)}$$
+<br>
+
+
+![](http://www.cpc.noaa.gov/products/precip/CWlink/MJO/plot_olr_tvalue_8pan_maysep.gif)
+</center>
+</br>
+
+<center>Figure 1. Outgoing longwave radiation during all phases of the Madden-Julian Oscillation, where phases refer to different locations during the cycle of the MJO. [@CPC2017]<center/>
+
+
+
+```{r, echo = FALSE}
+#Open files and locate variables
+#install.packages('ncdf4')
+#install.packages('checkpoint')
+library(ncdf4)
+files = list.files("netcdf/", pattern="*.nc", full.names=TRUE)
+
+for(i in seq_along(files)) {
+nc = nc_open(files[i])
+lon <- ncvar_get(nc, "longitude")
+lat <- ncvar_get(nc, "latitude")
+olr <- ncvar_get(nc, "olr")
+nc_close(nc)
+}
+```
+
+```{r, echo = FALSE}
+#Calculate statistics of olr
+mean_olr <- round(mean(olr), digits=1)
+sd_olr <- round(sd(olr), digits = 1)
+min_olr <- round(min(olr), digits = 1)
+max_olr <- round(max(olr), digits = 1)
+percentiles <- round(quantile(olr, c(.25, .5, .75)), digits=1)
+```
+
+### Results
+
+The mean OLR value of the data was `r mean_olr` W/m$^2$. The 25th percentile, median, and 75 percentile OLR values were `r percentiles[1]` W/m$^2$, `r percentiles[2]` W/m$^2$, `r percentiles[3]` W/m$^2$ respectively.The maximum and minimum OLR values were `r max_olr` W/m$^2$ and `r min_olr` W/m$^2$ respectively. A boxplot and table of the results can be found below.
+
+<br><center>
+```{r, echo = FALSE}
+#Plot data to make boxplot
+summarydata <- list(stats=matrix(c(min(olr),percentiles[1],percentiles[2],percentiles[3],max(olr)),5,1), n=10)
+bxp(summarydata)
+title(main="Global Outgoing Longwave Radiation", ylab="OLR (W/m2)")
+```
+<center/>
+<center> Figure 2: Boxplot of global outgoing longwave radiation in W/m$^2$ <center/>
+<br>
+<br>
+<br>
+
+Statistic                 Value(W/m$^2$)   
+-------                   ------ 
+Mean                      `r mean_olr`
+Standard Deviation        `r sd_olr`
+Minimum                   `r min_olr`
+25th percentile           `r percentiles[1]`  
+Median                    `r percentiles[2]`
+75th percentile           `r percentiles[3]`
+Maximum                   `r max_olr`
+
+<center> Table 1: Table of statistics and corresponding values in W/m$^2$. <center/>
+
+### Discussion
+Outgoing longwave radiation needs further studying as it is an important component for the Madden - Julian Oscillation, especially with global warming and increasing carbon dioxide levels. In a global warming scenario by [@Subramanian2014], outgoing longwave radiation is observed to increase eastward from 120 degrees longitude. With this spatial amplification in OLR, precipitation will propagate farther eastward into the Central and Eastern Pacific before termination. The frequency of active phases increased by 7% in the Indian Ocean and Western Hemisphere. Overall, the study resulted in a prediction of less MJO events globally with an increase in the amount of strong MJO events and a decrease in weaker events. For future work, limiting the data by the equator will allow for better OLR analysis as the majority of MJO activity occurs over this realm. As most MJO events vary in location longitudinally, specific case study analysis may be needed to study major MJO events to better analyze this OLR dataset.
+
+### References
+
